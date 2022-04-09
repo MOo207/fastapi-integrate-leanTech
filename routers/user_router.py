@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, HTMLResponse
 from models.db import SessionLocal
 from models.models import User
-from models.schemas import UserCreate
+from schemas.schemas import UserCreate
 from controllers import user_controller
 
 from passlib.context import CryptContext
@@ -27,39 +27,37 @@ def get_db():
     finally:
         db.close()
 
+
 @router.get("/", response_class=HTMLResponse)
 def login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
+@router.post('/login', response_class=HTMLResponse)
+async def login(user: UserCreate, db: Session = Depends(get_db)):
+    return await user_controller.login(user=user, db=db)
 
 @router.post("/signup")
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    try:
-        db_user = user_controller.get_user_by_email(db, email=user.email)
-        if db_user:
-            raise HTTPException(
-                status_code=400, detail="Email already registered")
-        else:
-            return user_controller.create_user(db=db, user=user)
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=400, detail=e)
+def signup(user: UserCreate, db: Session = Depends(get_db)):
+    return user_controller.signup_user(user=user, db=db)
 
 
-@router.post('/login', response_class=HTMLResponse)
-async def login(user: UserCreate, request: Request, db: Session = Depends(get_db)):
-    try:
-        req_body = await request.body()
-        print(req_body)
-        email = user.email
-        password = user.password
-        error = None
-        db_user = user_controller.get_user_by_email_and_password(db, email=email, password=password)
-        if db_user:
-            return templates.TemplateResponse("entity.html", {"error": error, "request": request, "data": user})
-        else: 
-            error = "Invalid email or password"
-            return templates.TemplateResponse("login.html", {"request": request, "error": error}) 
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=400, detail=e)
+@router.get("/users")
+def signup(db: Session = Depends(get_db)):
+    return user_controller.get_users(db=db)
+
+
+@router.get("/users/{user_id}")
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    return user_controller.get_user(db=db, user_id=user_id)
+
+
+
+
+@router.put('/update/{user_id}', response_class=HTMLResponse)
+async def update_user(user_id: int, user: UserCreate, db: Session = Depends(get_db)):
+    return await user_controller.update_user(user_id=user_id, db=db, user=user)
+
+
+@router.delete('/delete/{user_id}', response_class=HTMLResponse)
+async def delete_user(user_id: int, db: Session = Depends(get_db)):
+    return await user_controller.delete_user(user=user_id, db=db)

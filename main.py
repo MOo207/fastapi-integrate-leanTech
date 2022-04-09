@@ -19,5 +19,5 @@ app = FastAPI()
 
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"))
 
-app.include_router(user_router.router, prefix="/user")
-app.include_router(lean_data_api_route.router, prefix="/lean")
+app.include_router(user_router.router, prefix="", tags=["Users Route"])
+app.include_router(lean_data_api_route.router, prefix="/lean", tags=["Lean API Data Route"])
