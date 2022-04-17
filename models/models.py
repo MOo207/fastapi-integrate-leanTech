@@ -18,5 +18,9 @@ class LeanUser(Base):
     user = relationship("User")
 
     customer_id = Column(String, unique=True, index=True)
-    entity_id = Column(String, unique=True, index=True)
     app_user_id = Column(String, unique=True, index=True)
+    entity_id = Column(String, unique=True, index=True)
+
+    payment_source_id = Column(String, unique=True, index=True)
+    payment_destination_id = Column(String, unique=True, index=True)
+    payment_intent_id = Column(String, unique=True, index=True)
