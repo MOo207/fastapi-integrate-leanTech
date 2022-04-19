@@ -1,7 +1,6 @@
+import os
 from schemas.schemas import SignupUser, User
 from models.db import SessionLocal
-from os import stat
-from re import template
 from urllib.request import Request
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -71,6 +70,7 @@ async def signup_user(request: Request, db: Session = Depends(get_db)):
 async def login(request: Request, db: Session = Depends(get_db)):
     try:
         error = None
+        lean_app_token = os.getenv("LEAN_APP_TOKEN")
         # Workaround for the fact that form not send json data
         form_body = await request.body()
         decoded_form_body = form_body.decode("utf-8")
@@ -86,7 +86,7 @@ async def login(request: Request, db: Session = Depends(get_db)):
             if lean_user:
                 entity_id = lean_user.entity_id
                 if entity_id:
-                    return templates.TemplateResponse("lean_home.html", {"request": request, "lean_user": lean_user})
+                    return templates.TemplateResponse("data_home.html", {"request": request, "lean_user": lean_user, "lean_app_token": lean_app_token})
                 else:
                     return templates.TemplateResponse("lean_link.html", {"request": request, "customer_id": lean_user.customer_id})
             else: 

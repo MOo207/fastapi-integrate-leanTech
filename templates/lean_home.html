@@ -169,8 +169,8 @@
 <script>
   function link() {
     Lean.link({
-      app_token: '426fa12d-fbaa-45a7-8f8e-8b4ca949d467',
-      customer_id: 'drahim_task_lean_id',
+      app_token: '{{lean_app_token}}',
+      customer_id: '{{lean_user.customer_id}}',
       permissions: ["identity", "accounts", "balance", "transactions", "payments"],
       sandbox: 'true',
     });
@@ -178,8 +178,8 @@
 
   function reconnect() {
     Lean.reconnect({
-      app_token: '426fa12d-fbaa-45a7-8f8e-8b4ca949d467',
-      customer_id: '0136865f-7d8e-4a82-af95-2f677256fea9',
+      app_token: '{{lean_app_token}}',
+      customer_id: '{{lean_user.customer_id}}',
       permissions: ["identity","accounts","balance","transactions", "payments"],
       sandbox: 'true',
     });
@@ -187,25 +187,25 @@
 
   function updatePaymentSource() {
     Lean.updatePaymentSource({
-      app_token: '426fa12d-fbaa-45a7-8f8e-8b4ca949d467',
-      customer_id: '0136865f-7d8e-4a82-af95-2f677256fea9',
-      payment_source_id: "[PAYMENT_SOURCE_ID]",
-      payment_destination_id: "[PAYMENT_DESTINATION_ID]",
+      app_token: '{{lean_app_token}}',
+      customer_id: '{{lean_user.customer_id}}',
+      payment_source_id: "{{lean_user.payment_source_id}}",
+      payment_destination_id: "{{lean_user.payment_destination_id}}",
       sandbox: true
     });
   }
 
   function createPaymentSource() {
     Lean.createPaymentSource({
-      app_token: '426fa12d-fbaa-45a7-8f8e-8b4ca949d467',
-      customer_id: '0136865f-7d8e-4a82-af95-2f677256fea9',
+      app_token: '{{lean_app_token}}',
+      customer_id: '{{lean_user.customer_id}}',
       sandbox: true,
     });
   }
 
   function pay() {
     Lean.pay({
-      app_token: '426fa12d-fbaa-45a7-8f8e-8b4ca949d467',
+      app_token: '{{lean_app_token}}',
       payment_intent_id: "[PAYMENT_INTENT_ID]",
       sandbox: true,
     });

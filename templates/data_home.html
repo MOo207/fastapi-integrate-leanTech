@@ -1,0 +1,92 @@
+<html>
+
+<head>
+    <title>Lean front</title>
+    <script src="https://cdn.leantech.me/link/sdk/web/latest/Lean.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container">
+
+
+        <div class="card" style="margin-top: 20px;">
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <div class="card-header text-center">
+                            <h1>Lean Data Api Operations</h1>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+
+                                <div class="col-4">
+                                    <input class="btn btn-primary" type="button" id="lean-link-id" value="Get Identity"
+                                        onclick="getIdentity()">
+                                </div>
+                                <div class="col-4">
+                                    <input class="btn btn-primary" type="button" id="lean-link-id" value="Get Accounts"
+                                        onclick="getAccounts()">
+                                </div>
+                                <div class="col-4">
+                                    <input class="btn btn-primary" type="button" id="lean-link-id" value="Get Balance">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="card" style="margin-top: 20px;">
+            <div id="result" class="card-body text-center">
+            </div>
+        </div>
+
+    </div>
+</body>
+
+<script>
+    function getIdentity() {
+        $.ajax("/lean/get_identity", {
+            type: 'POST',
+            contentType: "application/json; charset=UTF-8",
+            dataType: 'json',
+            data: JSON.stringify({ entity_id: '{{lean_user.entity_id}}' }),
+            success: function (data) {
+                console.log(data);
+                $('#result').html(JSON.stringify(data));
+            },
+            error: function (data) {
+                console.log(data);
+                $('#result').html(data);
+            }
+        })
+    }
+
+    function getAccounts() {
+        $.ajax("/lean/get_accounts", {
+            type: 'POST',
+            contentType: "application/json; charset=UTF-8",
+            dataType: 'json',
+            data: JSON.stringify({ entity_id: '{{lean_user.entity_id}}' }),
+            success: function (data) {
+                console.log(data);
+                $('#result').html(JSON.stringify(data));
+            },
+            error: function (data) {
+                console.log(data);
+                $('#result').html(data);
+            }
+        })
+
+    }
+</script>
+
+</html>

@@ -1,7 +1,6 @@
 import os
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request
-from matplotlib.style import use
 import requests
 from controllers import lean_data_api_controller
 
@@ -20,6 +19,10 @@ def get_db():
 
 router = APIRouter()
 
+@router.get("/data_home")
+def fetch_identity(request: Request):
+    return lean_data_api_controller.render_data_home(request)
+
 @router.post('/create_lean_customer/{user_id}')
 async def create_lean_customer_post(user_id: int, request: Request, db: Session = Depends(get_db),):
     return await lean_data_api_controller.create_lean_customer_post(request=request, user_id=user_id,db=db)
@@ -32,23 +35,23 @@ def get_lean_customers(db: Session = Depends(get_db)):
 def render_lean_link(request: Request):
     return lean_data_api_controller.render_lean_link(request)
 
-@router.post("/entity_hook_handler")
-async def entity_hook_handler(request: Request):
-    return await lean_data_api_controller.entity_hook_handler(request)
+@router.post("/hook_handler")
+async def hook_handler(request: Request):
+    return await lean_data_api_controller.hook_handler(request)
 
 @router.get("/get_lean_user_by_customer_id/{customer_id}")
 def get_lean_user_by_customer_id(customer_id: str, db: Session = Depends(get_db)):
     return lean_data_api_controller.get_lean_user_by_customer_id(db=db, customer_id=customer_id)
 
-@router.post("/fetch_identity")
-async def fetch_identity(request: Request):
-    return await lean_data_api_controller.fetch_identity(request)
+@router.post("/get_identity")
+async def get_identity(request: Request):
+    return await lean_data_api_controller.get_identity(request)
 
 
-@router.post("/fetch_accounts")
-async def fetch_accounts(request: Request):
-    return lean_data_api_controller.fetch_accounts(request)
+@router.post("/get_accounts")
+async def get_accounts(request: Request):
+    return await lean_data_api_controller.get_accounts(request)
 
-@router.post("/fetch_balance")
-async def fetch_balance(request: Request):
-    return lean_data_api_controller.fetch_balance(request)
+@router.post("/get_balance")
+async def get_balance(request: Request):
+    return lean_data_api_controller.get_balance(request)

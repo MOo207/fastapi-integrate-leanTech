@@ -1,3 +1,4 @@
+import json
 import os
 import uuid
 from sqlalchemy.orm import Session
@@ -7,7 +8,9 @@ from fastapi.responses import JSONResponse
 from controllers.user_controller import get_user
 from model_controller import lean_data_model_controller
 import requests
+from models import models
 from models.db import SessionLocal
+from urllib.parse import unquote as unquote
 
 
 
@@ -19,6 +22,8 @@ def get_db():
     finally:
         db.close()
 
+def render_data_home(request: Request):
+    return templates.TemplateResponse("data_home.html", {"request": request})
 
 def create_lean_customer(db: Session = Depends(get_db),):
     try:
@@ -52,31 +57,30 @@ templates = Jinja2Templates(directory="templates")
 def render_lean_link(customer_id: str, request: Request):
     return templates.TemplateResponse("lean_link.html", {"request": request, "customer_id": customer_id,})
 
-async def entity_hook_handler(request: Request):
-    body = await request.json()
-    hook_type = body.get("type")
-    customer_id = body.get("payload").get("customer_id")
-    response = requests.get(url="http://localhost:8000/lean/get_lean_user_by_customer_id/" + customer_id)
-    if response.status_code == 200:
+async def hook_handler(request: Request,):
+    try:
+        db = SessionLocal()
+        body = await request.json()
+        hook_type = body.get("type")
+        customer_id = body.get("payload").get("customer_id")
+        lean_user = lean_data_model_controller.get_lean_user_by_customer_id(db=db, customer_id=customer_id)
         if hook_type == "entity.created":
             entity_id = body.get("payload").get("id")
-            print(entity_id)
-            return {"entity_id": entity_id}
+            lean_data_model_controller.create_lean_entity(db=db, user_id=lean_user.user_id, entity_id=entity_id)
         elif hook_type == "payment_source.beneficiary.created":
             payment_source_id = body.get("payload").get("payment_source_id")
-            print(payment_source_id)
             payment_destination_id = body.get("payload").get("payment_destination_id")
-            print(payment_destination_id)
-            return {"payment_source_id": payment_source_id, "payment_destination_id": payment_destination_id}
+            lean_data_model_controller.create_lean_payment_source_and_destination_id(db=db, user_id=lean_user.user_id, payment_source_id=payment_source_id, payment_destination_id=payment_destination_id)
         elif hook_type == "payment_source.created":
             bank_identifier = body.get("payload").get("bank_identifier")
-            print(bank_identifier)
-            return {"bank_identifier": bank_identifier}
+            return templates.TemplateResponse("lean_home.html", {"request": request,})
         else:
             return HTTPException(status_code=400, detail="Invalid hook type")
-    else:
-        return HTTPException(status_code=400, detail="Invalid customer id")
-
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=e)
+    finally:
+        db.close()
+   
 def get_lean_user_by_customer_id(customer_id: str, db: Session = Depends(get_db)):
     lean_user = lean_data_model_controller.get_lean_user_by_customer_id(db=db, customer_id=customer_id)
     return lean_user
@@ -102,11 +106,11 @@ async def create_lean_customer_post(user_id: int, request: Request, db: Session 
     except Exception as e:
         raise HTTPException(status_code=400, detail=e)
 
-async def fetch_identity(request: Request):
+async def get_identity(request: Request):
     try:
-        body = await request.json()
-        entity_id = body.get("entity_id")
-        print(entity_id)
+        body = await request.body()
+        json_body = json.loads(body)
+        entity_id = json_body.get("entity_id")
         lean_app_token = os.getenv("LEAN_APP_TOKEN")
         url = "https://sandbox.leantech.me/data/v1/identity"
         headers = {'Content-Type': 'application/json',
@@ -122,10 +126,11 @@ async def fetch_identity(request: Request):
     except Exception as e:
         raise HTTPException(status_code=400, detail=e)
 
-async def fetch_accounts(request: Request):
+async def get_accounts(request: Request):
     try:
-        req_body = await request.json()
-        entity_id = req_body.get("entity_id")
+        body = await request.body()
+        json_body = json.loads(body)
+        entity_id = json_body.get("entity_id")
         lean_app_token = os.getenv("LEAN_APP_TOKEN")
         print(lean_app_token)
         url = "https://sandbox.leantech.me/data/v1/accounts"
@@ -142,7 +147,7 @@ async def fetch_accounts(request: Request):
         raise HTTPException(status_code=400, detail=e)
 
 
-async def fetch_balance(request: Request):
+async def get_balance(request: Request):
     try:
         req_body = await request.json()
         entity_id = request.session.get("entity_id", None)

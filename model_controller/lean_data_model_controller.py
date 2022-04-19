@@ -41,9 +41,34 @@ def create_lean_customer(db: Session, user_id: int, response: dict):
             db.add(db_lean)
             db.commit()
             return db_lean
-       
+
+def create_lean_entity(db: Session, user_id: int, entity_id: int):
+    lean_user = get_lean_user(db, user_id)
+    if lean_user:
+        lean_user.entity_id = entity_id
+        db.commit()
+        return lean_user
     else:
-        return None
+       return None
+
+def create_lean_payment_source_and_destination_id(db: Session, user_id: int, payment_source_id: int, payment_destination_id: int):
+    lean_user = get_lean_user(db, user_id)
+    if lean_user:
+        lean_user.payment_source_id = payment_source_id
+        lean_user.payment_destination_id = payment_destination_id
+        db.commit()
+        return lean_user
+    else:
+       return None
+
+def create_lean_entity(db: Session, user_id: int, entity_id: int):
+    lean_user = get_lean_user(db, user_id)
+    if lean_user:
+        lean_user.entity_id = entity_id
+        db.commit()
+        return lean_user
+    else:
+       return None
 
 def link_lean_user(db: Session,user_id: int,  lean: schemas.LeanUserLink):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
